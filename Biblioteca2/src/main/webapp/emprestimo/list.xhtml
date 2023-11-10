@@ -1,0 +1,257 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+<f:view>
+	<h:head>
+		<h:outputStylesheet>
+            th, td {
+                text-align: center;
+            }
+
+            h3 {
+                margin-top: 0;
+                text-align: center;
+            }
+
+            input[type="text"] {
+                width: 100%;
+                box-sizing: border-box;
+                -webkit-box-sizing:border-box;
+                -moz-box-sizing: border-box;
+            }
+            
+        </h:outputStylesheet>
+	</h:head>
+	<h:body>
+		<h:form id="menu">
+			<p:menubar>
+				<p:submenu label="Cadastro" icon="pi pi-fw pi-user">
+					<p:menuitem value="Leitor" icon="pi pi-fw pi-user-plus" action="#{indexController.redirectLeitor()}"/>
+					<p:menuitem value="Livro" icon="pi pi-fw pi-inbox" action="#{indexController.redirectLivro()}"/>
+				</p:submenu>
+				<p:submenu label="Empréstimo" icon="pi pi-fw pi-shopping-cart">
+					<p:menuitem value="Empréstimo" icon="pi pi-fw pi-shopping-cart" action="#{indexController.redirectEmprestimo()}"/>
+				</p:submenu>
+			</p:menubar>
+		</h:form>
+		<p:outputPanel>
+			<h3>Empréstimos cadastrados</h3>
+			<div class="ui-g">
+				<div class="ui-g-2" />
+				<div class="ui-g-12">
+					<h:form id="emprestimos">
+						<p:growl id="growl" sticky="true" />
+
+						<p:dataTable id="emprestimoList" var="empr"
+							value="#{emprestimoController.emprestimos}">
+							
+							<p:column headerText="Id">
+								<h:outputText id="idInput" value="#{empr.id}" />
+							</p:column>
+
+							<p:column headerText="Nome leitor">
+								<h:outputText id="nomeInput" value="#{empr.leitor.nome}" />
+							</p:column>
+
+							<p:column headerText="Data saída">
+								<h:outputText id="dataInput" value="#{empr.dataEmprestimo}" />
+							</p:column>
+							
+							<p:column headerText="Status">
+								<h:outputText id="statusInput" value="#{empr.status}" />
+							</p:column>
+
+							<p:column>
+								<p:commandButton update="emprestimoList add" value="Editar"
+									icon="ui-icon-closethick"
+									action="#{emprestimoController.edit(empr)}"
+									styleClass="ui-icon-pencil"
+									rendered="#{empr.status.name().equals('INICIADA')}">
+								</p:commandButton>
+							</p:column>
+							<p:column>
+								<p:commandButton update="emprestimoList add" value="Cancelar"
+									icon="ui-icon-closethick"
+									action="#{emprestimoController.delete(empr)}"
+									styleClass="ui-priority-primary"
+									rendered="#{empr.status.name().equals('INICIADA')}">
+									<p:confirm header="Atenção" message="Tem certeza que deseja cancelar este emprestimo" icon="pi pi-exclamation-triangle"/>
+								</p:commandButton>
+							</p:column>
+							<p:column>
+								<p:commandButton update="emprestimoList add" value="Finalizar"
+									icon="ui-icon-closethick"
+									action="#{emprestimoController.finalizar(empr)}"
+									styleClass="ui-priority-primary"
+									rendered="#{empr.status.name().equals('INICIADA')}">
+									<p:confirm header="Atenção" message="Tem certeza que deseja finalizar este empréstimo?" icon="pi pi-exclamation-triangle"/>
+								</p:commandButton>
+							</p:column>
+						</p:dataTable>
+						<br />
+						<p:confirmDialog id="confirmDialog" global="true" showEffect="fade" hideEffect="fade" responsive="true" width="350px">
+				            <p:commandButton value="Não" type="button" styleClass="ui-confirmdialog-no ui-button-flat"/>
+				            <p:commandButton value="Sim" type="button" styleClass="ui-confirmdialog-yes" />
+				        </p:confirmDialog>
+					</h:form>
+				</div>
+				<div class="ui-g-2"></div>
+			</div>
+			<h3>Criar novo empréstimo</h3>
+			<div class="ui-g">
+				<div class="ui-g-2"></div>
+				<div class="ui-g-8">
+					<h:form id="add">
+						<div class="ui-fluid p-grid p-formgrid">
+							<div class="ui-fluid p-grid p-formgrid">
+					
+	<!-- 							<div class="p-field p-col-12 p-md-4">
+									<p:outputLabel for="Codigo" value="Codigo" />
+									<p:inputText id="Codigo"
+										value="#{emprestimoController.emprestimo.codigo}" required="true" />
+									<p:message for="Codigo" />
+								</div>  -->
+								
+								<div class="p-field p-col-12 p-md-4">
+									<p:outputLabel for="leitor" value="Leitor" />
+									<p:autoComplete id="leitor" value="#{emprestimoController.emprestimo.leitor}"
+		                                completeMethod="#{emprestimoController.filtrarLeitor}" scrollHeight="250"
+		                                var="leitor" itemLabel="#{leitor.nome}" itemValue="#{leitor}"
+		                                converter="leitorConverter" forceSelection="true"/>
+	                            </div>
+	                            
+	                            <div class="p-field p-col-12 p-md-4">
+									<p:outputLabel for="data" value="Data do Empréstimo" />
+									<p:datePicker id="data" value="#{emprestimoController.dataEmprestimo}" />
+									<p:message for="data" />
+								</div>
+	                            
+		
+								<div class="p-field p-col-12 p-md-12">
+									<p:commandLink id="ajax" action="#{emprestimoController.voltarTelaInicial()}" style="margin-right:20px;" ajax="false" immediate="true">
+							            <h:outputText value="Voltar"/>
+							        </p:commandLink>
+									<p:commandButton update="@form :emprestimos"
+										value="Cadastrar" action="#{emprestimoController.add}"
+										rendered="#{!emprestimoController.isUpdate}">
+									</p:commandButton>
+									<p:commandButton update="@form :emprestimos:emprestimoList"
+										value="Atualizar" action="#{emprestimoController.update}"
+										rendered="#{emprestimoController.isUpdate}">
+									</p:commandButton>
+									<p:commandButton update="@form :emprestimos:emprestimoList"
+										value="Cancelar" action="#{emprestimoController.cancel}"
+										immediate="true">
+										<f:ajax render="add" resetValues="true"/>
+									</p:commandButton>
+								</div>
+							</div>
+						</div>
+						<br/><br/>
+						<p:panel header="Livros">
+						
+							<div class="p-field p-col-12 p-md-4">
+								<p:outputLabel for="livro" value="Livro" />
+								<p:autoComplete id="livro" value="#{emprestimoController.livroSelecionado}"
+		                               completeMethod="#{emprestimoController.filtrarLivros}" scrollHeight="250"
+		                               var="livro" itemLabel="#{livro.titulo}" itemValue="#{livro}"
+		                               converter="livroConverter" forceSelection="true"
+		                               emptyMessage="Não encontramos nenhum registro com este nome"/>
+		                               
+<!-- 	                               <p:outputLabel for="vertical" value="Quantidade"/>
+				               			 <p:spinner id="vertical" value="#{emprestimoController.quantidadeLivro}" buttons="vertical"
+				                           upButtonStyleClass="ui-button-secondary" downButtonStyleClass="ui-button-secondary"/> -->
+		                   		<br/><br/>
+				                   <p:outputLabel for="Quantidade" value="Quantidade" />
+										<p:inputText id="Quantidade"
+											value="#{emprestimoController.quantidadeLivro}" required="true" />
+									<p:message for="Quantidade" />
+				                   
+				                   
+				                <p:commandButton update="@form :add:livros"
+											value="Adicionar" action="#{emprestimoController.adicionarLivro}">
+								</p:commandButton>
+								<p:commandButton update="@form :add:livros"
+											value="Remover" action="#{emprestimoController.removerLivro}">
+								</p:commandButton>
+	                        </div>
+		                            
+							<p:dataTable id="livros" var="prod" value="#{emprestimoController.livros}" editable="true"
+	                     		style="margin-bottom:20px">
+	                     		
+	                     		<!-- <p:ajax event="rowEdit" listener="#{vendaController.onRowEdit}" update="@form "/>
+	            				<p:ajax  -->event="rowEditCancel" listener="#{vendaController.onRowCancel}" update="@form "/>
+	                     		
+
+					            <p:column headerText="Titulo">
+					                <h:outputText value="#{prod.livro.titulo}" />
+					            </p:column>
+					            
+<!-- 					             <p:column headerText="Quantidade">
+					                <h:outputText value="#{prod.quantidade}" />
+					            </p:column> -->
+					            
+	<!-- 				            <p:column headerText="Quantidade">
+					                <p:cellEditor>
+					                    <f:facet name="output">
+					                        <h:outputText value="#{prod.quantidade}"/>
+					                    </f:facet>
+					                    <f:facet name="input">
+					                        <p:inputText id="quantidadeInput" value="#{prod.quantidade}" style="width:100%"/>
+					                        <p:outputLabel for="vertical" value="Quantidade"/>
+							                <p:spinner id="vertical" value="#{emprestimoController.quantidadeLivro}" buttons="vertical"
+							                           upButtonStyleClass="ui-button-secondary" downButtonStyleClass="ui-button-secondary"/>
+					                    </f:facet>
+					                </p:cellEditor>
+					            </p:column> -->
+					            
+<!-- 					             <p:column headerText="Valor Unitário">
+					                <h:outputText value="#{prod.livro.valor}" />
+					            </p:column>
+					            
+					            <p:column headerText="Valor Total">
+					                <h:outputText value="#{prod.valorTotal}" />
+					            </p:column> -->
+					            	
+					            <!-- <p:column style="width:6rem">
+					                <p:rowEditor editTitle="Editar" cancelTitle="Cancelar" saveTitle="Salvar"/>
+					            </p:column> -->
+					            
+					            
+					            	
+			            <p:column style="width:6rem">
+					                <p:rowEditor editTitle="Editar" cancelTitle="Cancelar" saveTitle="Salvar"/>
+					            </p:column> 
+					            <p:column>
+									<p:commandButton update="@form :add:livros" value="Delete"
+										icon="ui-icon-closethick"
+										action="#{emprestimoController.removerLivro(prod)}"
+										styleClass="ui-priority-primary">
+										<p:confirm header="Atenção" message="Tem certeza que deseja excluir este livro" icon="pi pi-exclamation-triangle"/>
+									</p:commandButton>
+								</p:column>
+								
+
+	                     		
+	                     	</p:dataTable>
+                     	</p:panel>
+                     	<br />
+						<p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="350">
+				            <p:commandButton value="Não" type="button" styleClass="ui-confirmdialog-no ui-button-flat"/>
+				            <p:commandButton value="Sim" type="button" styleClass="ui-confirmdialog-yes" />
+				        </p:confirmDialog>
+						
+					</h:form>
+					
+					
+					
+					
+					
+				</div>
+				<div class="ui-g-2"></div>
+			</div>
+		</p:outputPanel>
+	</h:body>
+</f:view>
+</html>

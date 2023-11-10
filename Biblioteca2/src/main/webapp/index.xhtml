@@ -1,0 +1,26 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+
+</h:head>
+
+	<h:body>
+	
+		<p:outputLabel value="Biblioteca Online" /><br/>
+		<h:form id="menu">
+			<p:menubar>
+				<p:submenu label="Cadastro" icon="pi pi-fw pi-user">
+					<p:menuitem value="Leitor" icon="pi pi-fw pi-user-plus" action="#{indexController.redirectLeitor()}"/>
+					<p:menuitem value="Livro" icon="pi pi-fw pi-inbox" action="#{indexController.redirectLivro()}"/>
+				</p:submenu>
+				<p:submenu label="Empréstimo" icon="pi pi-fw pi-shopping-cart">
+					<p:menuitem value="Empréstimo" icon="pi pi-fw pi-shopping-cart" action="#{indexController.redirectEmprestimo()}"/>
+				</p:submenu>
+			</p:menubar>
+		</h:form>
+	
+	</h:body>
+</html>
